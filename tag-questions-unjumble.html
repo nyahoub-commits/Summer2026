@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mind the Tag — Tag Questions Unjumble</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0C2340;
+    --navy-2:#173156;
+    --gold:#AE9142;
+    --gold-deep:#8C7233;
+    --gold-soft:#EBDDBC;
+    --paper:#EDF1F6;
+    --card:#FFFFFF;
+    --ink:#0C2340;
+    --muted:#5B6B82;
+    --line:#D3DCE7;
+    --success:#1F7A5A;
+    --success-soft:#E4F1EA;
+    --warn:#B4552E;
+    --warn-soft:#F7E9E1;
+    --radius:14px;
+    --shadow:0 1px 2px rgba(12,35,64,.06), 0 10px 30px rgba(12,35,64,.08);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font-family:"Montserrat", Arial, Helvetica, sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 600px at 100% -10%, rgba(174,145,66,.08), transparent 60%),
+      var(--paper);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:28px 20px 64px;}
+
+  /* Header */
+  header.masthead{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:18px;}
+  .brand{display:flex;flex-direction:column;gap:6px;}
+  .eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold-deep);font-weight:600;}
+  .eyebrow b{color:var(--navy);font-weight:700;}
+  h1{font-size:clamp(28px,5vw,40px);line-height:1.02;margin:0;font-weight:700;letter-spacing:-.02em;}
+  h1 .tag-mark{color:var(--gold);}
+  .subtitle{color:var(--muted);font-size:14px;font-weight:400;max-width:46ch;}
+  .scoreboard{display:flex;gap:10px;}
+  .stat{background:var(--navy);color:#fff;border-radius:12px;padding:10px 14px;min-width:74px;text-align:center;box-shadow:var(--shadow);}
+  .stat .num{font-size:22px;font-weight:700;line-height:1;}
+  .stat .lbl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-soft);margin-top:4px;}
+
+  /* Progress */
+  .progress-row{display:flex;align-items:center;gap:12px;margin:10px 0 22px;}
+  .progress{flex:1;height:8px;background:#dfe6ef;border-radius:99px;overflow:hidden;}
+  .progress > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--gold-deep));border-radius:99px;transition:width .4s ease;}
+  .counter{font-size:12px;color:var(--muted);font-weight:600;white-space:nowrap;}
+
+  /* Card */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
+  .card-head{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .chip{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--navy);background:var(--gold-soft);border:1px solid #dcc98f;padding:5px 10px;border-radius:99px;}
+  .prompt{font-size:14px;color:var(--muted);font-weight:500;}
+  .card-body{padding:22px;}
+
+  .section-label{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:0 0 10px;}
+
+  /* Answer zone — ruled paper */
+  .answer{
+    min-height:78px;border-radius:12px;padding:14px;
+    background:
+      linear-gradient(var(--card) 0 0) padding-box,
+      repeating-linear-gradient(180deg, transparent 0 37px, #e6ecf3 37px 38px);
+    border:1px dashed #c3cfdd;
+    display:flex;flex-wrap:wrap;gap:9px;align-content:flex-start;
+  }
+  .answer.empty::after{content:"Tap the words below in order to build the sentence.";color:#9aa8ba;font-size:13px;font-style:italic;font-weight:400;align-self:center;}
+  .answer.correct{border:1px solid var(--success);background:var(--success-soft);}
+  .answer.wrong{border:1px solid var(--warn);background:var(--warn-soft);animation:nudge .32s ease;}
+  @keyframes nudge{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+
+  .bank{display:flex;flex-wrap:wrap;gap:9px;margin-top:18px;min-height:44px;}
+
+  .tile{
+    font-family:inherit;font-size:16px;font-weight:500;color:var(--navy);
+    background:#fff;border:1px solid var(--line);border-bottom-width:2px;
+    padding:9px 14px;border-radius:10px;cursor:pointer;transition:transform .08s ease, box-shadow .15s ease, background .15s ease;
+    box-shadow:0 1px 0 rgba(12,35,64,.04);
+  }
+  .tile:hover{background:#f4f7fb;transform:translateY(-1px);}
+  .tile:active{transform:translateY(0);}
+  .tile.in-answer{background:var(--navy);color:#fff;border-color:var(--navy-2);}
+  .tile.in-answer:hover{background:var(--navy-2);}
+  .tile.locked{cursor:default;pointer-events:none;}
+  .tile:focus-visible{outline:3px solid var(--gold);outline-offset:2px;}
+
+  /* Tag highlight on reveal — the "hang tag" signature */
+  .tile.tag-word{position:relative;background:var(--gold);color:var(--navy);border-color:var(--gold-deep);}
+  .tile.tag-word.first-tag::before{
+    content:"";position:absolute;left:-13px;top:50%;transform:translateY(-50%);
+    width:11px;height:11px;border-radius:50%;background:transparent;border:2px solid var(--gold-deep);
+  }
+  .tile.tag-word.first-tag::after{
+    content:"";position:absolute;left:-2px;top:50%;transform:translateY(-50%) rotate(0deg);
+    width:12px;height:2px;background:var(--gold-deep);
+  }
+
+  /* Controls */
+  .controls{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px;}
+  button.btn{font-family:inherit;font-weight:600;font-size:14px;border-radius:10px;padding:11px 18px;cursor:pointer;border:1px solid transparent;transition:background .15s ease,transform .08s ease,border-color .15s;}
+  button.btn:active{transform:translateY(1px);}
+  button.btn:focus-visible{outline:3px solid var(--gold);outline-offset:2px;}
+  .btn-primary{background:var(--navy);color:#fff;}
+  .btn-primary:hover{background:var(--navy-2);}
+  .btn-gold{background:var(--gold);color:var(--navy);}
+  .btn-gold:hover{background:#bf9f4c;}
+  .btn-ghost{background:transparent;color:var(--navy);border-color:var(--line);}
+  .btn-ghost:hover{background:#f2f5f9;}
+  .btn:disabled{opacity:.45;cursor:not-allowed;}
+
+  /* Feedback */
+  .feedback{margin-top:18px;border-radius:12px;padding:0;overflow:hidden;max-height:0;opacity:0;transition:max-height .35s ease,opacity .3s ease;border:1px solid transparent;}
+  .feedback.show{max-height:520px;opacity:1;}
+  .feedback.ok{border-color:#bfe0d0;background:var(--success-soft);}
+  .feedback.no{border-color:#e6c6b6;background:var(--warn-soft);}
+  .feedback-inner{padding:16px 18px;}
+  .fb-title{font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .fb-title.ok{color:var(--success);}
+  .fb-title.no{color:var(--warn);}
+  .fb-rule{font-size:14px;color:var(--ink);}
+  .fb-rule b{color:var(--gold-deep);}
+  .intonation{margin-top:12px;display:flex;gap:10px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;}
+  .into-badge{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--navy);border-radius:6px;padding:3px 8px;white-space:nowrap;}
+  .into-badge.rising{background:var(--gold-deep);}
+  .into-text{font-size:13px;color:var(--muted);}
+  .into-text b{color:var(--ink);}
+  .listen{margin-top:12px;}
+  .btn-listen{background:#fff;border:1px solid var(--line);color:var(--navy);font-size:13px;font-weight:600;border-radius:9px;padding:8px 14px;cursor:pointer;display:inline-flex;gap:8px;align-items:center;}
+  .btn-listen:hover{background:#f4f7fb;}
+  .btn-listen:focus-visible{outline:3px solid var(--gold);outline-offset:2px;}
+
+  /* Toolbar / teacher */
+  .toolbar{margin-top:22px;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;}
+  .toolbar .left{display:flex;flex-wrap:wrap;gap:14px;align-items:center;}
+  .toggle{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);font-weight:500;cursor:pointer;user-select:none;}
+  .toggle input{appearance:none;width:38px;height:22px;background:#c9d3e0;border-radius:99px;position:relative;cursor:pointer;transition:background .2s;}
+  .toggle input:checked{background:var(--gold);}
+  .toggle input::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 2px rgba(0,0,0,.2);}
+  .toggle input:checked::after{transform:translateX(16px);}
+  .toggle input:focus-visible{outline:3px solid var(--gold);outline-offset:2px;}
+  .link-btn{background:none;border:none;color:var(--gold-deep);font-family:inherit;font-weight:600;font-size:13px;cursor:pointer;text-decoration:underline;text-underline-offset:3px;padding:0;}
+  .link-btn:hover{color:var(--navy);}
+
+  /* Teacher panel */
+  .teacher{margin-top:16px;border:1px solid var(--line);border-radius:12px;background:#fff;overflow:hidden;display:none;}
+  .teacher.open{display:block;}
+  .teacher-head{padding:12px 16px;background:#f5f8fc;border-bottom:1px solid var(--line);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;}
+  .teacher-body{padding:16px;}
+  .teacher-body p{margin:0 0 10px;font-size:13px;color:var(--muted);}
+  .teacher-body code{background:#eef2f7;border:1px solid #dbe3ee;border-radius:5px;padding:1px 6px;font-size:12px;color:var(--navy);}
+  textarea{width:100%;min-height:120px;font-family:"Montserrat",Arial,sans-serif;font-size:14px;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:12px;resize:vertical;line-height:1.6;}
+  textarea:focus-visible{outline:3px solid var(--gold);outline-offset:1px;}
+  .teacher-actions{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;}
+  .parse-note{font-size:12.5px;margin-top:10px;font-weight:600;}
+  .parse-note.ok{color:var(--success);}
+  .parse-note.no{color:var(--warn);}
+
+  /* Finish screen */
+  .finish{text-align:center;padding:14px 6px;}
+  .finish .big{font-size:44px;font-weight:700;color:var(--navy);letter-spacing:-.02em;}
+  .finish .big span{color:var(--gold);}
+  .finish p{color:var(--muted);margin:6px 0 20px;}
+
+  footer.foot{margin-top:30px;text-align:center;font-size:12px;color:#93a1b5;}
+  footer.foot b{color:var(--navy);}
+
+  @media (max-width:560px){
+    .scoreboard{order:3;width:100%;}
+    .stat{flex:1;}
+    .card-body{padding:16px;}
+    h1{font-size:30px;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important;transition:none !important;}
+  }
+  @media print{
+    body{background:#fff;}
+    .scoreboard,.controls,.toolbar,.teacher,.progress-row,.feedback,.listen{display:none !important;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="masthead">
+    <div class="brand">
+      <div class="eyebrow"><b>ApproachUSA</b> · Advanced Grammar</div>
+      <h1>Mind the <span class="tag-mark">Tag</span></h1>
+      <div class="subtitle">Rebuild each sentence, then clip on the right question tag. Watch the auxiliary, the polarity, and the pronoun.</div>
+    </div>
+    <div class="scoreboard">
+      <div class="stat"><div class="num" id="statPoints">0</div><div class="lbl">Points</div></div>
+      <div class="stat"><div class="num" id="statSolved">0</div><div class="lbl">Solved</div></div>
+    </div>
+  </header>
+
+  <div class="progress-row">
+    <div class="progress"><i id="progressBar"></i></div>
+    <div class="counter" id="counter">1 / 12</div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <span class="chip" id="ruleChip">Tag question</span>
+      <span class="prompt" id="prompt">Put the words in order to form a correct statement + tag.</span>
+    </div>
+    <div class="card-body" id="gameBody">
+      <p class="section-label">Your sentence</p>
+      <div class="answer empty" id="answer" aria-live="polite"></div>
+
+      <p class="section-label" style="margin-top:18px;">Word bank</p>
+      <div class="bank" id="bank"></div>
+
+      <div class="controls">
+        <button class="btn btn-primary" id="checkBtn">Check answer</button>
+        <button class="btn btn-gold" id="hintBtn">Hint</button>
+        <button class="btn btn-ghost" id="clearBtn">Clear</button>
+        <button class="btn btn-ghost" id="nextBtn" style="margin-left:auto;">Skip →</button>
+      </div>
+
+      <div class="feedback" id="feedback">
+        <div class="feedback-inner">
+          <div class="fb-title" id="fbTitle"></div>
+          <div class="fb-rule" id="fbRule"></div>
+          <div class="intonation" id="intoBox">
+            <span class="into-badge" id="intoBadge">Falling</span>
+            <span class="into-text" id="intoText"></span>
+          </div>
+          <div class="listen">
+            <button class="btn-listen" id="listenBtn">▶ Listen to the sentence</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="left">
+      <label class="toggle"><input type="checkbox" id="shuffleToggle" checked /> Shuffle sentence order</label>
+      <label class="toggle"><input type="checkbox" id="explainToggle" checked /> Show grammar notes</label>
+    </div>
+    <div style="display:flex;gap:16px;align-items:center;">
+      <button class="link-btn" id="teacherToggle">Add your own sentences</button>
+      <button class="link-btn" id="restartBtn">Restart</button>
+    </div>
+  </div>
+
+  <div class="teacher" id="teacherPanel">
+    <div class="teacher-head">Teacher mode — custom sentence set</div>
+    <div class="teacher-body">
+      <p>One sentence per line. Each must have a comma before the tag and end with a question mark, e.g. <code>You've read it, haven't you?</code> This works for any unjumble topic, not just tag questions. Sentences stay on this device only and reset when you reload.</p>
+      <textarea id="customInput" placeholder="You've read the article, haven't you?&#10;She wasn't at the meeting, was she?&#10;Let's start now, shall we?"></textarea>
+      <div class="teacher-actions">
+        <button class="btn btn-primary" id="loadCustom">Load these sentences</button>
+        <button class="btn btn-ghost" id="restoreDefault">Restore default set</button>
+      </div>
+      <div class="parse-note" id="parseNote" style="display:none;"></div>
+    </div>
+  </div>
+
+  <footer class="foot"><b>Mind the Tag</b> · ApproachUSA · CEFR B2–C1</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---- Default sentence set (advanced tag-question rules) ----
+  var DEFAULT_SET = [
+    {t:"You've already finished the report, haven't you?", chip:"Present perfect",
+     rule:"Present perfect statement, so the tag repeats the auxiliary <b>have</b> — positive statement takes a negative tag.", into:"falling",
+     intoText:"With a <b>falling</b> tone you're confirming what you already believe, not really asking."},
+    {t:"I'm the only one who wasn't told, aren't I?", chip:"am → aren't I",
+     rule:"With <b>I am</b>, the fixed negative tag is <b>aren't I?</b> — never \"amn't I\".", into:"rising",
+     intoText:"A <b>rising</b> tone here signals you genuinely want to be corrected if you're wrong."},
+    {t:"Let's not make a decision tonight, shall we?", chip:"Let's → shall we",
+     rule:"<b>Let's</b> always takes <b>shall we?</b>, even when the statement is negative.", into:"falling",
+     intoText:"<b>Falling</b> — you're proposing, and expect the group to agree."},
+    {t:"Nobody warned you about the deadline, did they?", chip:"Negative word",
+     rule:"<b>Nobody</b> is negative in meaning, so the tag turns positive — and <b>they</b> refers back to \"nobody\".", into:"rising",
+     intoText:"<b>Rising</b> — this is a real question checking whether anyone said something."},
+    {t:"You'd rather work from home, wouldn't you?", chip:"'d rather",
+     rule:"<b>You'd rather</b> = \"you would rather\", so the tag uses <b>would</b>.", into:"falling",
+     intoText:"<b>Falling</b> — you're fairly sure and inviting agreement."},
+    {t:"There's hardly any coffee left, is there?", chip:"there / hardly",
+     rule:"<b>Hardly</b> makes the clause negative (positive tag), and <b>there</b> is repeated as the subject.", into:"rising",
+     intoText:"<b>Rising</b> — you're genuinely checking the amount left."},
+    {t:"Turn the music down a little, will you?", chip:"Imperative",
+     rule:"Imperatives take <b>will you?</b> — or \"won't you?\" to sound softer and more inviting.", into:"falling",
+     intoText:"<b>Falling</b> — it's a request, not a question about the facts."},
+    {t:"He'd never say that to your face, would he?", chip:"never / 'd",
+     rule:"<b>He'd</b> = \"he would\" here, and <b>never</b> makes it negative, so the tag is positive: <b>would he?</b>", into:"rising",
+     intoText:"<b>Rising</b> — you're seeking reassurance and open to the answer."},
+    {t:"This isn't quite what we agreed on, is it?", chip:"Negative → positive",
+     rule:"A negative statement takes a <b>positive</b> tag: <b>isn't</b> → <b>is it?</b>", into:"rising",
+     intoText:"<b>Rising</b> — you suspect a problem and want confirmation."},
+    {t:"We really should apologize, shouldn't we?", chip:"Modal",
+     rule:"The modal <b>should</b> is simply repeated in the tag — no change of verb needed.", into:"falling",
+     intoText:"<b>Falling</b> — you've made up your mind and expect agreement."},
+    {t:"You couldn't lend me a hand, could you?", chip:"Polite request",
+     rule:"A negative statement with <b>could</b> takes the positive tag <b>could you?</b> — a common way to soften a request.", into:"rising",
+     intoText:"<b>Rising</b> — the rise is what makes it sound polite rather than presumptuous."},
+    {t:"Everyone passed the exam, didn't they?", chip:"everyone → they",
+     rule:"<b>Everyone</b> takes the plural pronoun <b>they</b> in the tag.", into:"rising",
+     intoText:"<b>Rising</b> — you're checking a fact you're not certain of."}
+  ];
+
+  // ---- State ----
+  var SET = DEFAULT_SET.slice();
+  var order = [];
+  var idx = 0;
+  var points = 0;
+  var solved = 0;
+  var built = [];       // array of token indices placed in the answer, in order
+  var placedFlags = []; // whether token index currently placed
+  var hintUsed = false;
+  var locked = false;   // sentence solved -> tiles frozen
+
+  // ---- Elements ----
+  var $ = function(id){ return document.getElementById(id); };
+  var answerEl=$("answer"), bankEl=$("bank"), feedbackEl=$("feedback"),
+      fbTitle=$("fbTitle"), fbRule=$("fbRule"), intoBox=$("intoBox"),
+      intoBadge=$("intoBadge"), intoText=$("intoText"), listenBtn=$("listenBtn"),
+      ruleChip=$("ruleChip"), counter=$("counter"), progressBar=$("progressBar"),
+      statPoints=$("statPoints"), statSolved=$("statSolved");
+
+  // ---- Helpers ----
+  function tokenize(s){ return s.trim().split(/\s+/); }
+  function shuffled(arr){
+    var a=arr.slice();
+    for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}
+    return a;
+  }
+  function tagStartIndex(tokens){
+    for(var i=0;i<tokens.length;i++){ if(tokens[i].indexOf(",")>-1) return i+1; }
+    return tokens.length; // no comma -> no tag highlight
+  }
+
+  function current(){ return SET[order[idx]]; }
+  function currentTokens(){ return tokenize(current().t); }
+
+  // ---- Rendering ----
+  function renderBank(){
+    var tokens = currentTokens();
+    bankEl.innerHTML="";
+    // Build a stable scrambled display order once per sentence, stored on the sentence render
+    displayOrder.forEach(function(ti){
+      if(placedFlags[ti]) return; // placed tiles live in the answer zone
+      bankEl.appendChild(makeTile(ti, tokens[ti], false));
+    });
+  }
+  function renderAnswer(){
+    var tokens = currentTokens();
+    answerEl.innerHTML="";
+    built.forEach(function(ti){
+      answerEl.appendChild(makeTile(ti, tokens[ti], true));
+    });
+    answerEl.classList.toggle("empty", built.length===0);
+  }
+  function makeTile(ti, text, inAnswer){
+    var b=document.createElement("button");
+    b.className="tile"+(inAnswer?" in-answer":"");
+    b.type="button";
+    b.textContent=text;
+    b.setAttribute("aria-label", (inAnswer?"Remove word ":"Add word ")+text);
+    if(locked){
+      b.classList.add("locked");
+    } else {
+      b.addEventListener("click", function(){
+        if(locked) return;
+        if(inAnswer){ removeFromAnswer(ti); } else { addToAnswer(ti); }
+      });
+    }
+    return b;
+  }
+
+  var displayOrder=[]; // scrambled bank order for the current sentence
+
+  function addToAnswer(ti){
+    if(placedFlags[ti]) return;
+    placedFlags[ti]=true;
+    built.push(ti);
+    clearFeedbackVisual();
+    renderAnswer(); renderBank();
+  }
+  function removeFromAnswer(ti){
+    var pos=built.indexOf(ti);
+    if(pos>-1){ built.splice(pos,1); placedFlags[ti]=false; }
+    clearFeedbackVisual();
+    renderAnswer(); renderBank();
+  }
+  function clearAnswer(){
+    if(locked) return;
+    built=[]; placedFlags=currentTokens().map(function(){return false;});
+    clearFeedbackVisual();
+    renderAnswer(); renderBank();
+  }
+  function clearFeedbackVisual(){
+    answerEl.classList.remove("correct","wrong");
+  }
+
+  // ---- Check / feedback ----
+  function checkAnswer(){
+    if(locked) return;
+    var tokens=currentTokens();
+    if(built.length!==tokens.length){
+      flashWrong("Use every word — you still have some in the bank.");
+      return;
+    }
+    var correct = built.every(function(ti,i){ return ti===i; });
+    if(correct){ onCorrect(); } else { flashWrong(); }
+  }
+
+  function flashWrong(msg){
+    answerEl.classList.remove("correct");
+    answerEl.classList.add("wrong");
+    if($("explainToggle").checked || msg){
+      showFeedback(false, msg || "Not quite. Check the tag: does the auxiliary and the positive/negative match the statement?");
+    }
+  }
+
+  function onCorrect(){
+    locked=true;
+    solved++;
+    points += hintUsed ? 5 : 10;
+    statPoints.textContent=points;
+    statSolved.textContent=solved;
+    answerEl.classList.remove("wrong");
+    answerEl.classList.add("correct");
+    highlightTag();
+    lockTiles();
+    showFeedback(true);
+    $("checkBtn").disabled=true;
+    $("hintBtn").disabled=true;
+    $("nextBtn").textContent = (idx>=order.length-1) ? "See results →" : "Next →";
+  }
+
+  function highlightTag(){
+    var tokens=currentTokens();
+    var start=tagStartIndex(tokens);
+    var tiles=answerEl.querySelectorAll(".tile");
+    tiles.forEach(function(tile,i){
+      if(i>=start){
+        tile.classList.add("tag-word");
+        if(i===start) tile.classList.add("first-tag");
+      }
+    });
+  }
+  function lockTiles(){
+    answerEl.querySelectorAll(".tile").forEach(function(t){t.classList.add("locked");});
+  }
+
+  function showFeedback(ok, wrongMsg){
+    var c=current();
+    fbTitle.className="fb-title "+(ok?"ok":"no");
+    fbTitle.textContent = ok ? (hintUsed ? "✓ Correct — nice work (hint used)" : "✓ Correct — clean solve!")
+                             : "Try again";
+    feedbackEl.className="feedback show "+(ok?"ok":"no");
+
+    if(ok && $("explainToggle").checked){
+      fbRule.innerHTML = c.rule;
+      fbRule.style.display="block";
+      // intonation
+      if(c.into){
+        intoBox.style.display="flex";
+        intoBadge.textContent = c.into==="rising" ? "Rising ↗" : "Falling ↘";
+        intoBadge.className="into-badge "+(c.into==="rising"?"rising":"");
+        intoText.innerHTML = c.intoText || "";
+      } else {
+        intoBox.style.display="none";
+      }
+      $("listenBtn").parentElement.style.display = supportsTTS() ? "block" : "none";
+    } else if(ok){
+      fbRule.style.display="none"; intoBox.style.display="none";
+      $("listenBtn").parentElement.style.display = supportsTTS() ? "block" : "none";
+    } else {
+      fbRule.innerHTML = wrongMsg;
+      fbRule.style.display="block";
+      intoBox.style.display="none";
+      $("listenBtn").parentElement.style.display="none";
+    }
+  }
+
+  // ---- Hint ----
+  function giveHint(){
+    if(locked) return;
+    hintUsed=true;
+    // 1) Ensure the first word is placed correctly at the front
+    var tokens=currentTokens();
+    // remove first word if placed out of position, then lock it in front
+    if(!(built.length>0 && built[0]===0)){
+      // rebuild: pull token 0 to the front
+      if(placedFlags[0]){ // remove it from wherever it is
+        var p=built.indexOf(0); if(p>-1) built.splice(p,1);
+      }
+      built.unshift(0);
+      placedFlags[0]=true;
+      renderAnswer(); renderBank();
+    }
+    // 2) Show the rule as guidance (without full answer)
+    feedbackEl.className="feedback show no";
+    fbTitle.className="fb-title no";
+    fbTitle.textContent="Hint";
+    fbRule.innerHTML="<b>Focus:</b> "+current().chip+". "+current().rule.replace(/<b>/g,"<b>");
+    intoBox.style.display="none";
+    $("listenBtn").parentElement.style.display="none";
+  }
+
+  // ---- Navigation ----
+  function loadSentence(){
+    locked=false; hintUsed=false; built=[];
+    var tokens=currentTokens();
+    placedFlags=tokens.map(function(){return false;});
+    // Make a scramble that isn't already the correct order
+    var indices=tokens.map(function(_,i){return i;});
+    do{ displayOrder=shuffled(indices); }
+    while(tokens.length>1 && displayOrder.every(function(v,i){return v===i;}));
+
+    ruleChip.textContent=current().chip || "Sentence";
+    $("checkBtn").disabled=false;
+    $("hintBtn").disabled=false;
+    $("nextBtn").textContent = (idx>=order.length-1) ? "Skip to results →" : "Skip →";
+    feedbackEl.className="feedback";
+    clearFeedbackVisual();
+    renderAnswer(); renderBank();
+    updateProgress();
+  }
+  function updateProgress(){
+    counter.textContent=(idx+1)+" / "+order.length;
+    progressBar.style.width=((idx)/order.length*100)+"%";
+  }
+  function next(){
+    if(idx>=order.length-1){ showFinish(); return; }
+    idx++; loadSentence();
+  }
+
+  function showFinish(){
+    progressBar.style.width="100%";
+    var max=order.length*10;
+    var body=$("gameBody");
+    body.innerHTML=
+      '<div class="finish">'+
+        '<div class="big">'+points+'<span> / '+max+'</span></div>'+
+        '<p>You solved <b>'+solved+' of '+order.length+'</b> sentences. '+
+        (solved===order.length? 'Every tag matched — excellent control.' : 'Give the tricky tags another run to sharpen it up.')+'</p>'+
+        '<button class="btn btn-primary" id="againBtn">Play again</button>'+
+      '</div>';
+    $("againBtn").addEventListener("click", startGame);
+    counter.textContent=order.length+" / "+order.length;
+  }
+
+  // ---- TTS ----
+  function supportsTTS(){ return "speechSynthesis" in window; }
+  function speak(){
+    if(!supportsTTS()) return;
+    window.speechSynthesis.cancel();
+    var u=new SpeechSynthesisUtterance(current().t);
+    u.rate=0.92; u.pitch=1.0;
+    window.speechSynthesis.speak(u);
+  }
+
+  // ---- Teacher mode ----
+  function parseCustom(raw){
+    var lines=raw.split(/\n+/).map(function(l){return l.trim();}).filter(Boolean);
+    var ok=[], bad=[];
+    lines.forEach(function(l){
+      var hasComma=l.indexOf(",")>-1;
+      var endsQ=/\?$/.test(l);
+      var words=tokenize(l);
+      if(hasComma && endsQ && words.length>=3){
+        ok.push({t:l, chip:"Custom", rule:"Custom sentence — check that the tag matches the statement's auxiliary and its positive/negative polarity.", into:null, intoText:null});
+      } else { bad.push(l); }
+    });
+    return {ok:ok, bad:bad};
+  }
+
+  // ---- Wiring ----
+  function startGame(){
+    // restore body if we came from finish screen
+    if(!document.getElementById("answer")){
+      $("gameBody").innerHTML=
+        '<p class="section-label">Your sentence</p>'+
+        '<div class="answer empty" id="answer" aria-live="polite"></div>'+
+        '<p class="section-label" style="margin-top:18px;">Word bank</p>'+
+        '<div class="bank" id="bank"></div>'+
+        '<div class="controls">'+
+          '<button class="btn btn-primary" id="checkBtn">Check answer</button>'+
+          '<button class="btn btn-gold" id="hintBtn">Hint</button>'+
+          '<button class="btn btn-ghost" id="clearBtn">Clear</button>'+
+          '<button class="btn btn-ghost" id="nextBtn" style="margin-left:auto;">Skip →</button>'+
+        '</div>'+
+        '<div class="feedback" id="feedback"><div class="feedback-inner">'+
+          '<div class="fb-title" id="fbTitle"></div>'+
+          '<div class="fb-rule" id="fbRule"></div>'+
+          '<div class="intonation" id="intoBox"><span class="into-badge" id="intoBadge"></span><span class="into-text" id="intoText"></span></div>'+
+          '<div class="listen"><button class="btn-listen" id="listenBtn">▶ Listen to the sentence</button></div>'+
+        '</div></div>';
+      rebindGameEls();
+    }
+    points=0; solved=0; idx=0;
+    statPoints.textContent="0"; statSolved.textContent="0";
+    order = $("shuffleToggle").checked ? shuffled(SET.map(function(_,i){return i;}))
+                                       : SET.map(function(_,i){return i;});
+    loadSentence();
+  }
+
+  function rebindGameEls(){
+    answerEl=$("answer"); bankEl=$("bank"); feedbackEl=$("feedback");
+    fbTitle=$("fbTitle"); fbRule=$("fbRule"); intoBox=$("intoBox");
+    intoBadge=$("intoBadge"); intoText=$("intoText"); listenBtn=$("listenBtn");
+    $("checkBtn").addEventListener("click", checkAnswer);
+    $("hintBtn").addEventListener("click", giveHint);
+    $("clearBtn").addEventListener("click", clearAnswer);
+    $("nextBtn").addEventListener("click", next);
+    listenBtn.addEventListener("click", speak);
+  }
+
+  // initial bind
+  rebindGameEls();
+  $("teacherToggle").addEventListener("click", function(){
+    $("teacherPanel").classList.toggle("open");
+  });
+  $("restartBtn").addEventListener("click", startGame);
+  $("shuffleToggle").addEventListener("change", startGame);
+
+  $("loadCustom").addEventListener("click", function(){
+    var res=parseCustom($("customInput").value);
+    var note=$("parseNote");
+    note.style.display="block";
+    if(res.ok.length===0){
+      note.className="parse-note no";
+      note.textContent="No usable lines. Each sentence needs a comma before the tag and a question mark at the end.";
+      return;
+    }
+    SET=res.ok;
+    note.className="parse-note ok";
+    note.textContent="Loaded "+res.ok.length+" sentence"+(res.ok.length>1?"s":"")+
+      (res.bad.length? " · skipped "+res.bad.length+" line"+(res.bad.length>1?"s":"")+" (missing comma or \"?\")." : ".");
+    $("teacherPanel").classList.remove("open");
+    startGame();
+  });
+  $("restoreDefault").addEventListener("click", function(){
+    SET=DEFAULT_SET.slice();
+    var note=$("parseNote"); note.style.display="block";
+    note.className="parse-note ok"; note.textContent="Default set restored ("+SET.length+" sentences).";
+    startGame();
+  });
+
+  // keyboard: Enter checks
+  document.addEventListener("keydown", function(e){
+    if(e.key==="Enter" && document.getElementById("checkBtn") && !$("checkBtn").disabled){
+      checkAnswer();
+    }
+  });
+
+  startGame();
+})();
+</script>
+</body>
+</html>
